@@ -168,10 +168,12 @@ class ImageResizeGui(tk.Tk):
 
         frame_row = 0
 
-        self.label_settings_name_info = ttk.Label(self.label_frame, text="Current used settings:")
-        self.label_settings_name_info.grid(row=frame_row, column=0, sticky=tk.NSEW)
-        self.entry_settings_name_info = ttk.Label(self.label_frame, textvariable=self.current_settings_name_var)
-        self.entry_settings_name_info.grid(row=frame_row, column=1, sticky=tk.W)
+        self.label_load_settings = ttk.Label(self.label_frame, text="current converter settings:")
+        self.label_load_settings.grid(row=frame_row, column=0, sticky=tk.NSEW)
+        self.combox_current_settings = ttk.Combobox(self.label_frame, width=20, textvariable=self.current_settings_name_var)
+        self.combox_current_settings["values"] = tuple(self.preferences[KEY_CONVERT_SETTINGS].keys())
+        self.combox_current_settings.bind("<<ComboboxSelected>>", self.load_settings)
+        self.combox_current_settings.grid(row=frame_row, column=1, sticky=tk.W)
 
         frame_row += 1
 
@@ -200,16 +202,6 @@ class ImageResizeGui(tk.Tk):
         self.label_max_height.grid(row=frame_row, column=0, sticky=tk.NSEW)
         self.entry_max_height = ttk.Entry(self.label_frame, width=5, textvariable=self.current_settings["max_height"])
         self.entry_max_height.grid(row=frame_row, column=1, sticky=tk.W)
-
-        frame_row += 1
-
-        self.label_load_settings = ttk.Label(self.label_frame, text="load settings:")
-        self.label_load_settings.grid(row=frame_row, column=0, sticky=tk.NSEW)
-        self.combox_current_settings = ttk.Combobox(self.label_frame, width=20, textvariable=tk.StringVar())
-        self.combox_current_settings["values"] = tuple(self.preferences[KEY_CONVERT_SETTINGS].keys())
-        self.combox_current_settings.set(self.current_settings_name_var.get())
-        self.combox_current_settings.bind("<<ComboboxSelected>>", self.load_settings)
-        self.combox_current_settings.grid(row=frame_row, column=1, sticky=tk.W)
 
         frame_row += 1
 
