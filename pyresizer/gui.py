@@ -86,7 +86,7 @@ class ImageResizeGui(tk.Tk):
                 self.winfo_screenheight() * 0.1,
             )
         )
-        self.set_title("loading...")
+        self.set_title("<No image open>")
 
         self.columnconfigure(0, weight=1)
         self.rowconfigure(0, weight=1)
@@ -245,13 +245,6 @@ class ImageResizeGui(tk.Tk):
         self.origin_stdout_write = sys.stdout.write
         sys.stdout.write = self.stdout_redirect_handler
 
-        self.set_preview_image(
-            file_path=Path(
-                # "/home/jens/Bilder/K5II2357.jpg"
-                "/home/jens/windows_daten/Bilder/Bilder/2019/02/24/K1__0140_klein.jpg"
-            )
-        )
-
         self.mainloop()
 
     def _init_current_settings(self):
@@ -333,7 +326,7 @@ class ImageResizeGui(tk.Tk):
             json.dump(self.preferences, f, indent="\t", cls=JSONEncoder)
 
     def set_title(self, text):
-        self.title("%s v%s - %s" % (self.__class__.__name__, __version__, text))
+        self.title("PyResizer (GPL) v%s - %s" % (__version__, text))
 
     def set_preview_image(self, file_path):
         self.current_image_path = file_path
