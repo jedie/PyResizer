@@ -18,12 +18,12 @@ import tempfile
 from pathlib import Path
 from pprint import pprint
 
+from pyresizer import __version__
 from pyresizer.constants import (
-    DEAFULT_CONVERT_KEY, DEFAULT_SETTINGS, IMAGE_FILE_MASK, KEY_CONVERT_SETTINGS, KEY_LAST_PATH, KEY_SETTINGS_NAME,
-    SETTINGS_FILE
+    DEFAULT_SETTINGS, DEFAULT_SETTINGS_NAME, IMAGE_FILE_MASK, KEY_CONVERT_SETTINGS, KEY_LAST_PATH,
+    KEY_LAST_SETTINGS_NAME, KEY_SETTINGS_NAME, SETTINGS_FILE
 )
 from pyresizer.image import convert
-from pyresizer import __version__
 
 try:
     import tkinter as tk
@@ -113,7 +113,7 @@ class ImageResizeGui(tk.Tk):
             elif KEY_CONVERT_SETTINGS not in self.preferences:
                 self.preferences = None
             else:
-                if DEAFULT_CONVERT_KEY not in self.preferences[KEY_CONVERT_SETTINGS]:
+                if DEFAULT_SETTINGS_NAME not in self.preferences[KEY_CONVERT_SETTINGS]:
                     self.preferences = None
 
             if self.preferences is None:
@@ -129,7 +129,12 @@ class ImageResizeGui(tk.Tk):
         print("\nAll settings:")
         pprint(self.preferences)
 
-        self.current_settings_key = DEAFULT_CONVERT_KEY
+        settings_name = self.preferences.get(KEY_LAST_SETTINGS_NAME, None)
+        if not settings_name:
+            settings_name = DEFAULT_SETTINGS_NAME
+
+        self.current_settings_name_var = tk.StringVar(value=settings_name)
+
         self.current_settings = self._init_current_settings()
 
         print("\nCurrent 'default' settings:")
@@ -163,6 +168,13 @@ class ImageResizeGui(tk.Tk):
 
         frame_row = 0
 
+        self.label_settings_name_info = ttk.Label(self.label_frame, text="Current used settings:")
+        self.label_settings_name_info.grid(row=frame_row, column=0, sticky=tk.NSEW)
+        self.entry_settings_name_info = ttk.Label(self.label_frame, textvariable=self.current_settings_name_var)
+        self.entry_settings_name_info.grid(row=frame_row, column=1, sticky=tk.W)
+
+        frame_row += 1
+
         self.label_text = ttk.Label(self.label_frame, text="copyright text:")
         self.label_text.grid(row=frame_row, column=0, sticky=tk.NSEW)
         self.entry_text = ttk.Entry(self.label_frame, width=50, textvariable=self.current_settings["text"])
@@ -193,10 +205,11 @@ class ImageResizeGui(tk.Tk):
 
         self.label_load_settings = ttk.Label(self.label_frame, text="load settings:")
         self.label_load_settings.grid(row=frame_row, column=0, sticky=tk.NSEW)
-        self.entry_load_settings = ttk.Combobox(self.label_frame, width=20, textvariable=tk.StringVar())
-        self.entry_load_settings["values"] = tuple(self.preferences[KEY_CONVERT_SETTINGS].keys())
-        self.entry_load_settings.bind("<<ComboboxSelected>>", self.load_settings)
-        self.entry_load_settings.grid(row=frame_row, column=1, sticky=tk.W)
+        self.combox_current_settings = ttk.Combobox(self.label_frame, width=20, textvariable=tk.StringVar())
+        self.combox_current_settings["values"] = tuple(self.preferences[KEY_CONVERT_SETTINGS].keys())
+        self.combox_current_settings.set(self.current_settings_name_var.get())
+        self.combox_current_settings.bind("<<ComboboxSelected>>", self.load_settings)
+        self.combox_current_settings.grid(row=frame_row, column=1, sticky=tk.W)
 
         frame_row += 1
 
@@ -204,10 +217,16 @@ class ImageResizeGui(tk.Tk):
             self.label_frame, text="Create new settings:", command=self.new_convert_settings
         )
         self.button_save_settings.grid(row=frame_row, column=0, sticky=tk.NSEW)
-        self.entry_settings_name = ttk.Entry(
-            self.label_frame, width=20, textvariable=self.current_settings["settings_name"]
-        )
+        self.new_settings_name_var = tk.StringVar(value="")
+        self.entry_settings_name = ttk.Entry(self.label_frame, width=20, textvariable=self.new_settings_name_var)
         self.entry_settings_name.grid(row=frame_row, column=1, sticky=tk.W)
+
+        frame_row += 1
+
+        self.button_save_settings = tk.Button(
+            self.label_frame, text="Delete current settings", command=self.delete_convert_settings
+        )
+        self.button_save_settings.grid(row=frame_row, column=0, sticky=tk.NSEW)
 
         ####################################################################################
         # main frame: action buttons
@@ -254,9 +273,15 @@ class ImageResizeGui(tk.Tk):
         self.mainloop()
 
     def _init_current_settings(self):
-        data = self.preferences[KEY_CONVERT_SETTINGS][self.current_settings_key]
+        settings_name = self.current_settings_name_var.get()
+
+        try:
+            data = self.preferences[KEY_CONVERT_SETTINGS][settings_name]
+        except KeyError:
+            print("ERROR: Settings %r not exists, use %r" % (settings_name, DEFAULT_SETTINGS_NAME))
+            data = self.preferences[KEY_CONVERT_SETTINGS][DEFAULT_SETTINGS_NAME]
+
         new_settings = data.copy()
-        new_settings[KEY_SETTINGS_NAME] = self.current_settings_key
 
         for key, value in new_settings.items():
             try:
@@ -269,11 +294,10 @@ class ImageResizeGui(tk.Tk):
             instance = obj(master=self, value=value, name=key)
             new_settings[key] = instance
 
-        pprint(new_settings)
+        # pprint(new_settings)
         return new_settings
 
-    def _current_settings2preferences(self):
-        settings_name = self.entry_settings_name.get()
+    def _current_settings2preferences(self, settings_name):
         print("Save settings to:", settings_name)
 
         if settings_name not in self.preferences[KEY_CONVERT_SETTINGS]:
@@ -283,43 +307,56 @@ class ImageResizeGui(tk.Tk):
         for key, value in self.current_settings.items():
             self.preferences[KEY_CONVERT_SETTINGS][settings_name][key] = value.get()
 
-        self.preferences[KEY_LAST_PATH] = self.last_path
+        self._load_settings(settings_name)
 
-        pprint(self.preferences[KEY_CONVERT_SETTINGS][settings_name])
-
-    def load_settings(self, *args):
-        settings_name = self.entry_load_settings.get()
-        print("\nLoad settings:", settings_name)
-
+    def _load_settings(self, settings_name):
+        print("Load settings:", settings_name)
         new_settings = self.preferences[KEY_CONVERT_SETTINGS][settings_name]
-        pprint(new_settings)
+        # pprint(new_settings)
 
         for key, value in new_settings.items():
             tk_variable = self.current_settings[key]
-            print(repr(tk_variable), repr(value))
+            # print(repr(tk_variable), repr(value))
             tk_variable.set(value)
 
-        self.current_settings[KEY_SETTINGS_NAME].set(settings_name)
+        self.preferences[KEY_LAST_SETTINGS_NAME] = settings_name
+        self.current_settings_name_var.set(settings_name)
+        self.combox_current_settings.set(settings_name)
+        self.combox_current_settings["values"] = tuple(self.preferences[KEY_CONVERT_SETTINGS].keys())
+
+    def load_settings(self, *args):
+        settings_name = self.combox_current_settings.get()
+        self._load_settings(settings_name)
 
     def new_convert_settings(self):
-        self._current_settings2preferences()
+        new_settings_name = self.new_settings_name_var.get()
+        if not new_settings_name:
+            messagebox.showinfo(message="Error: No settings name give.")
+            return
+
+        self._current_settings2preferences(new_settings_name)
+
+    def delete_convert_settings(self):
+        settings_name = self.current_settings_name_var.get()
+        if settings_name == DEFAULT_SETTINGS_NAME:
+            messagebox.showinfo(message="Error: Can't delete default settings.")
+            return
+        print("Delete: %r" % settings_name)
+        del (self.preferences[KEY_CONVERT_SETTINGS][settings_name])
+        self._load_settings(DEFAULT_SETTINGS_NAME)
 
     def save_settings(self):
         """
         Save current settings into: "~/.PyResizer.json"
         """
-        self._current_settings2preferences()
+        settings_name = self.current_settings_name_var.get()
+        self._current_settings2preferences(settings_name)
 
         print("Save settings to: %s" % self.settings_path)
         pprint(self.preferences)
 
-        temp = copy.deepcopy(self.preferences)
-        for convert_settings in temp[KEY_CONVERT_SETTINGS].values():
-            if KEY_SETTINGS_NAME in convert_settings:
-                del (convert_settings[KEY_SETTINGS_NAME])
-
         with self.settings_path.open("w") as f:
-            json.dump(temp, f, indent="\t", cls=JSONEncoder)
+            json.dump(self.preferences, f, indent="\t", cls=JSONEncoder)
 
     def set_title(self, text):
         self.title("%s v%s - %s" % (self.__class__.__name__, __version__, text))
