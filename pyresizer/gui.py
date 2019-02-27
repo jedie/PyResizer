@@ -206,16 +206,6 @@ class ImageResizeGui(tk.Tk):
         frame_row += 1
 
         self.button_save_settings = tk.Button(
-            self.label_frame, text="Create new settings:", command=self.new_convert_settings
-        )
-        self.button_save_settings.grid(row=frame_row, column=0, sticky=tk.NSEW)
-        self.new_settings_name_var = tk.StringVar(value="")
-        self.entry_settings_name = ttk.Entry(self.label_frame, width=20, textvariable=self.new_settings_name_var)
-        self.entry_settings_name.grid(row=frame_row, column=1, sticky=tk.W)
-
-        frame_row += 1
-
-        self.button_save_settings = tk.Button(
             self.label_frame, text="Delete current settings", command=self.delete_convert_settings
         )
         self.button_save_settings.grid(row=frame_row, column=0, sticky=tk.NSEW)
@@ -320,14 +310,6 @@ class ImageResizeGui(tk.Tk):
         settings_name = self.combox_current_settings.get()
         self._load_settings(settings_name)
 
-    def new_convert_settings(self):
-        new_settings_name = self.new_settings_name_var.get()
-        if not new_settings_name:
-            messagebox.showinfo(message="Error: No settings name give.")
-            return
-
-        self._current_settings2preferences(new_settings_name)
-
     def delete_convert_settings(self):
         settings_name = self.current_settings_name_var.get()
         if settings_name == DEFAULT_SETTINGS_NAME:
@@ -345,7 +327,7 @@ class ImageResizeGui(tk.Tk):
         self._current_settings2preferences(settings_name)
 
         print("Save settings to: %s" % self.settings_path)
-        pprint(self.preferences)
+        # pprint(self.preferences)
 
         with self.settings_path.open("w") as f:
             json.dump(self.preferences, f, indent="\t", cls=JSONEncoder)
@@ -354,7 +336,7 @@ class ImageResizeGui(tk.Tk):
         self.title("%s v%s - %s" % (self.__class__.__name__, __version__, text))
 
     def set_preview_image(self, file_path):
-        self.current_image_path = file_path.parent
+        self.current_image_path = file_path
         self.set_title(str(file_path))
         self.label_image_preview.configure(text=str(file_path))
 
@@ -363,11 +345,13 @@ class ImageResizeGui(tk.Tk):
         self.image_preview.image = self.photo
         log.debug("New image set: %s", self.image_preview.image)
 
+        self.preferences[KEY_LAST_PATH] = file_path.parent
+
     def callback_ask_open_file(self, *args):
         print("_" * 100)
-        print("Use current path:", self.current_image_path)
+        print("Use current path:", self.preferences[KEY_LAST_PATH])
         filename = filedialog.askopenfilename(
-            initialdir=str(self.current_image_path),
+            initialdir=str(self.preferences[KEY_LAST_PATH]),
             title="Select image to resize",
             filetypes=[("Images", IMAGE_FILE_MASK), ("all files", "*.*")],
         )
