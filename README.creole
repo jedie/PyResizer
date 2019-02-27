@@ -1,4 +1,4 @@
-# PyResizer
+== PyResizer
 
 Tkinter GUI program to resize images via pillow
 
@@ -8,10 +8,15 @@ GNU General Public License v3 or later (GPLv3+)
 * https://github.com/jedie/PyResizer/
 * https://pypi.org/project/PyResizer/
 
-## dev. startup
 
-```bash
+== 2019-02-27 PyResizer v0.1.0.png ==
 
+{{https://raw.githubusercontent.com/jedie/jedie.github.io/master/screenshots/PyResizer/2019-02-27 PyResizer v0.1.0.png|2019-02-27 PyResizer v0.1.0.png}}
+
+
+== dev. startup
+
+{{{
 # clone repository from github:
 ~$ git clone https://github.com/jedie/PyResizer.git
 
@@ -24,5 +29,5 @@ GNU General Public License v3 or later (GPLv3+)
 
 # Start GUI:
 (.virtualenv) ~/PyResizer$ pyresizer
-```
+}}}
 

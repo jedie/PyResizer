@@ -12,12 +12,22 @@ try:
 except:
     __version__ = "<unknown>"
 
-try:
-    with open("README.md", "r") as f:
-        long_description = f.read()
-except Exception as err:
-    long_description = "ERROR: %s" % err
+PACKAGE_ROOT = os.path.os.path.dirname(os.path.abspath(__file__))
 
+# _____________________________________________________________________________
+# convert creole to ReSt on-the-fly, see also:
+# https://github.com/jedie/python-creole/wiki/Use-In-Setup
+long_description = None
+for arg in ("test", "check", "register", "sdist", "--long-description"):
+    if arg in sys.argv:
+        try:
+            from creole.setup_utils import get_long_description
+        except ImportError as err:
+            raise ImportError("%s - Please install python-creole - e.g.: pip install python-creole" % err)
+        else:
+            long_description = get_long_description(PACKAGE_ROOT)
+        break
+# ----------------------------------------------------------------------------
 
 if "publish" in sys.argv:
     """
@@ -110,7 +120,7 @@ if "publish" in sys.argv:
     else:
         print("\n *** ERROR: git repro not clean:")
         print(output)
-        confirm("\nReally?\n%s" % output)
+        sys.exit(-1)
 
     print("\nRun './setup.py check':")
     call_info, output = verbose_check_output("./setup.py", "check")
@@ -190,13 +200,10 @@ setuptools.setup(
     author_email="pypi@jensdiemer.de",
     description="Tkinter GUI program to resize images via pillow",
     long_description=long_description,
-    long_description_content_type="text/markdown",
     url="https://github.com/jedie/PyResizer",
     packages=setuptools.find_packages(),
-    python_requires='>=3.5',
-    install_requires=[
-        "pillow",  # https://python-pillow.org
-    ],
+    python_requires=">=3.5",
+    install_requires=["pillow"],  # https://python-pillow.org
     classifiers=[
         # https://pypi.org/classifiers/
         "Programming Language :: Python :: 3",
@@ -204,10 +211,9 @@ setuptools.setup(
         "Operating System :: OS Independent",
     ],
     entry_points={
-        'console_scripts': [
-
+        "console_scripts": [
             # run the dev. server:
-            'pyresizer = pyresizer.gui:main',
+            "pyresizer = pyresizer.gui:main"
         ]
     },
 )
