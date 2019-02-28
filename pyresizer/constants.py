@@ -39,13 +39,13 @@ DEFAULT_SETTINGS = {
             "filesize": 1000000,
             "max_height": 1000,
             "max_width": 2000,
-            "text": "DEFAULT copyright %s by %s (CC BY-NC-ND 2.0)" % (YEAR, USER_NAME),
+            "text": "copyright %s by %s (CC BY-NC-ND 2.0)" % (YEAR, USER_NAME),
         },
         "small": {
             "filesize": 200000,
             "max_height": 450,
             "max_width": 600,
-            "text": "SMALL copyright %s by %s (CC BY-NC-ND 2.0)" % (YEAR, USER_NAME),
+            "text": "copyright %s by %s (CC BY-NC-ND 2.0)" % (YEAR, USER_NAME),
         },
     },
 }
