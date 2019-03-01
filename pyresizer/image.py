@@ -105,7 +105,7 @@ def convert(
         im.save(
             str(out_filepath),
             #
-            # # https://pillow.readthedocs.io/en/stable/handbook/image-file-formats.html#jpeg
+            # https://pillow.readthedocs.io/en/stable/handbook/image-file-formats.html#jpeg
             "JPEG",
             #
             # preserve existing ICC profile:

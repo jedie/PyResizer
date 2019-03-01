@@ -380,7 +380,7 @@ class ImageResizeGui(tk.Tk):
             font_path="Pillow/Tests/fonts/DejaVuSans.ttf",
             # font_path="/usr/share/fonts/truetype",
             #
-            text=text,  # ,
+            text=text,
             text_opacity=70,
             max_size=max_size,
             quality=99,
