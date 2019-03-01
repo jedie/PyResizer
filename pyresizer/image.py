@@ -37,6 +37,7 @@ def convert(
     assert file_path.is_file(), "File not found: %s" % file_path
 
     out_filepath = Path(file_path.parent, "%s%s.jpg" % (file_path.stem, out_prefix))
+    print("Create: %s" % out_filepath)
     if out_filepath.is_file():
         print("Out file already exists: %s" % out_filepath)
         if not overwrite_existing:
