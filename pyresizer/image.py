@@ -117,6 +117,9 @@ def convert(
             # encoder should make an extra pass over the image in order to select optimal encoder settings:
             optimize=True,
             #
+            # Apply most common chroma subsampling:
+            subsampling="4:2:0",
+            #
             # image quality, on a scale from 1 (worst) to 95 (best). The default is 75. Values above 95 should be avoided
             quality=quality,
         )
