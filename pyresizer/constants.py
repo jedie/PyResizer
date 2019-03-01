@@ -51,4 +51,5 @@ DEFAULT_SETTINGS = {
 }
 
 # For open image dialog:
-IMAGE_FILE_MASK = ("*.jpg", "*.jpeg", "*.png", "*.dng", "*.DNG")
+# FIXME: How can be enable case-insensitive matching?
+IMAGE_FILE_MASK = ("*.jpg", "*.jpeg", "*.JPG", "*.png", "*.dng", "*.DNG")

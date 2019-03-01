@@ -346,6 +346,7 @@ class ImageResizeGui(tk.Tk):
         filename = filedialog.askopenfilename(
             initialdir=str(self.preferences[KEY_LAST_PATH]),
             title="Select image to resize",
+            # FIXME: How can be enable case-insensitive matching?
             filetypes=[("Images", IMAGE_FILE_MASK), ("all files", "*.*")],
         )
         if not filename:
