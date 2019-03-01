@@ -361,6 +361,9 @@ class ImageResizeGui(tk.Tk):
         text = self.entry_text.get()
         print("Text: %r" % text)
 
+        settings_name = self.current_settings_name_var.get()
+        print("Use filename prefix: %r" % settings_name)
+
         max_size = int(self.entry_filesize.get())
         print("Max file size: %i Bytes" % max_size)
 
@@ -371,7 +374,7 @@ class ImageResizeGui(tk.Tk):
 
         convert(
             file_path=self.current_image_path,
-            out_prefix="_small",
+            out_prefix="_%s" % settings_name,
             overwrite_existing=True,
             size=size,
             #
